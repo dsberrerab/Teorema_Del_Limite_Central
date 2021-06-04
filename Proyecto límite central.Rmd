@@ -5,8 +5,6 @@ date: "3/6/2021"
 output:
   html_document: 
     toc: yes
-  pdf_document: default
-toc: yes
 bibliography: Teorema.bib
 ---
 
@@ -80,7 +78,7 @@ Son, precisamente, este tipo de resultados un fuerte apoyo de la teoría del mue
 
 [Capítulo completo sobre TLC en R](https://bookdown.org/aquintela/EBE/el-teorema-central-del-limite.html)
 
-# Aproximación de una distribución chi-cuadrado ($\chi^2$) a la normal
+# Aproximación de una distribución chi-cuadrado ($\chi^2$) a la normal usando el TLC
 
 ```{r, include=FALSE}
 library(ggplot2)
