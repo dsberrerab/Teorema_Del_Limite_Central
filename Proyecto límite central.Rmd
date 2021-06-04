@@ -1,0 +1,121 @@
+---
+title: "Proyecto Teorema Limite central"
+author: "Danna Sofía Barrera"
+date: "3/6/2021"
+output:
+  html_document: 
+    toc: yes
+  pdf_document: default
+toc: yes
+bibliography: Teorema.bib
+---
+
+\pagebreak
+
+<div style="text-align: justify">
+
+# Definición
+
+El teorema del límite central es una teoría estadística que establece que, dada una **muestra aleatoria** suficientemente grande de la población, la distribución de las medias muestrales seguirá una **distribución normal**.
+
+Además, este teorema afirma que a medida que el tamaño de la muestra se incrementa, la media muestral se acercará a la media de la población. Por tanto, mediante el mismo podemos definir la distribución de la media muestral de una determinada población con una varianza conocida. De manera que la distribución seguirá una distribución normal si el tamaño de la muestra es lo suficientemente grande. [@lopez2018teorema]
+
+# Teorema 
+
+De manera formal y compacta el teorema enuncia [@Stanton2017central]
+
+Sean $\mathbf{X_1, X_2, ..., X_n}$ variables aleatorias independientes e idénticamente distribuidas con $\mathbf{E[X_i]=\mu}$ y $\mathbf{Var(X_i)=\sigma^2 < \infty}$, se define
+
+$$
+Z_n = \frac{\sum_{i=1}^{n} \mathbf{X_i}-n\mu}{\sigma\sqrt{n}}
+$$
+
+Entonces la función de distribución de $Z_n$ converge hacia la función de distribución normal estándar cuando $n \rightarrow \infty$, es decir
+
+$$
+\lim_{n\rightarrow \infty} \mathbf{P}(Z_n \leq z) = \phi(z) = \int_{-\infty}^{z} \frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}dx
+$$
+
+Es muy común encontrarlo con la variable estandarizada $Z_n$ en función de la media muestral $\mathbf{\bar X}$ es decir
+
+$$
+Z_n = \frac{\mathbf{X}-\mu}{\sigma \sqrt{n}}
+$$
+
+>"Es importante remarcar que este teorema no dice nada acerca de la distribución de la variable aleatoria $\mathbf{X_i}$, excepto la existencia de media y varianza". [@Larry2004statistics]
+
+# Principales propiedades
+
+Este teorema tiene una serie de propiedades de gran utilidad en el ámbito estadístico y probabilístico. [@lopez2018teorema] 
+
+- Si el tamaño de la muestra es suficientemente grande, la distribución de las medias muestrales seguirá aproximadamente una distribución normal. El TLC considera una muestra como grande cuando el tamaño de la misma es superior a 30. Por tanto, si la muestra es superior a 30, la media muestral tendrá una función de distribución próxima a una normal. Y esto se cumple independientemente de la forma de la distribución con la que estamos trabajando.
+
+- La media poblacional y la media muestral serán iguales. Es decir, la media de la distribución de todas las medias muestrales será igual a la media del total de la población.
+
+- La varianza de la distribución de las medias muestrales será $\frac{\sigma^2}{n}$. Que es la varianza de la población dividido entre el tamaño de la muestra.
+
+# Ejemplo
+
+Se supone que se entrevista a 50 rusos. Parece ser que la probabilidad de que un ruso no crea que el hombre llegó a la luna es 0.57. [Referencia](https://www.yucatan.com.mx/imagen/los-rusos-no-creen-que-el-hombre-llego-a-la-luna)
+
+La proporción de gente en la muestra que dirá “NO”, cuando le preguntemos si cree que el hombre llegó a la luna, será un número más o menos cercano a 0.57 (quizá no demasiado, puesto que 50 son pocas personas).
+
+Podemos simular en R el proceso de preguntar a 50 personas hoy, mañana, pasado y así, por ejemplo, durante 20 días:
+
+```{r}
+y=rbinom(20,50,0.57)/50 #Proporción de cada muestra en 50 personas
+hist(y, col="lightgreen")
+abline(v=0.57, col="blue")
+```
+
+Si en vez de repetirlo 20 días, lo hacemos 1000, tenemos mil valores de la proporción muestral, y, como antes, podemos dibujar su histograma:
+
+```{r}
+y=rbinom(1000,50,0.57)/50
+hist(y, col="lightblue")
+abline(v=0.57, col="red") 
+```
+
+Son, precisamente, este tipo de resultados un fuerte apoyo de la teoría del muestreo, en la cual se fundamentan las encuestas de opinión o electorales. Si las muestras de la población en la que se realiza un sondeo son relativamente grandes, se puede precisar con bastante fiabilidad la opinión de una población a través de la muestra, y la variabilidad existente en esta “opinión muestral”.
+
+[Capítulo completo sobre TLC en R](https://bookdown.org/aquintela/EBE/el-teorema-central-del-limite.html)
+
+# Aproximación de una distribución chi-cuadrado ($\chi^2$) a la normal
+
+```{r, include=FALSE}
+library(ggplot2)
+library(gganimate)
+library(tidyverse)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+Chi_cua <- function(n, k){
+  x <- rchisq(n = n, df = k)
+  med <- mean(x)
+  (med - k)/sqrt((2*k/n))
+}
+
+Med <- data.frame(id = 1:1000, y = replicate(1000, Chi_cua(60, 20)))
+
+p <- ggplot(data = Med, aes(x = y)) + geom_histogram(aes(y = ..density..)) +
+  geom_density()
+p
+
+Med_ani <- Med %>% split(.$id) %>% accumulate(~ bind_rows(.x, .y)) %>% 
+  bind_rows(.id = "frame") %>% mutate(frame = as.integer(frame))
+
+p_anim <- ggplot(data = Med_ani, aes(x = y)) + geom_histogram(bins = 20, 
+          aes(y = ..density..), fill = "blue", alpha = 0.5, 
+          position = "identity") + geom_density() + stat_function(fun = dnorm, 
+                                        colour = "red", size = 2) + ylim(0,0.75)
+
+anim <- p_anim + transition_manual(frame) + ease_aes("linear") + enter_fade() +
+  exit_fade()
+
+anim
+```
+
+# Bibliografía
+
+<div/>
