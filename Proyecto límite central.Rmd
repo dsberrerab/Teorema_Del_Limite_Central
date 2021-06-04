@@ -105,10 +105,11 @@ Med_ani <- Med %>% split(.$id) %>% accumulate(~ bind_rows(.x, .y)) %>%
 p_anim <- ggplot(data = Med_ani, aes(x = y)) + geom_histogram(bins = 20, 
           aes(y = ..density..), fill = "blue", alpha = 0.5, 
           position = "identity") + geom_density() + stat_function(fun = dnorm, 
-                                        colour = "red", size = 2) + ylim(0,0.75)
+                                      colour = "red", size = 2) + ylim(0,0.75) 
+  
 
 anim <- p_anim + transition_manual(frame) + ease_aes("linear") + enter_fade() +
-  exit_fade()
+  exit_fade() + ggtitle('Chi-cuadrado', subtitle = 'Marco {frame} de {nframes}')
 
 anim
 ```
